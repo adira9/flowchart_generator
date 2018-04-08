@@ -1,0 +1,42 @@
+//Parallelogram drawing Fn.
+
+float X, Y; //Center coordinates.
+
+float round_value(float v)
+{
+  return floor(v + 0.5);
+}
+void LineDDL(double X0,double Y0, double X1, double Y1) // P0-P1 line.
+{
+  double dx=(X1-X0);
+  double dy=(Y1-Y0);
+  double steps;
+  float xInc,yInc,x=X0,y=Y0;
+  /* Find out whether to increment x or y */
+  steps=(fabs(dx)>fabs(dy))?(fabs(dx)):(fabs(dy));
+  xInc=dx/(float)steps;
+  yInc=dy/(float)steps;
+
+  glPointSize(2.5);
+  glBegin(GL_POINTS);
+  glVertex2d(x,y);
+  int k;
+  /* For every step, find an intermediate vertex */
+  for(k=0;k<steps;k++)
+  {
+    x+=xInc;
+    y+=yInc;
+    glVertex2d(round_value(x), round_value(y));
+  }
+  glEnd();
+  glFlush();
+}
+
+void DrawPara(double Side_length, int count, float space) //count = length of the string. space = space b/w the shape and the string.
+{
+glColor3f(1.0,1.0,1.0);
+LineDDL(X-(Side_length/2+space),Y+Side_length/count,X+Side_length/2+space*2,Y+Side_length/count); //A-B
+LineDDL(X+Side_length/2+space*2,Y+Side_length/count,2*X - (X-(Side_length/2+space)),2*Y-(Y+Side_length/count) );//B-C
+LineDDL(2*X - (X-(Side_length/2+space)),2*Y-(Y+Side_length/count),2*X-(X+Side_length/2+space*2),2*Y-(Y+Side_length/count));//C-D
+LineDDL(2*X-(X+Side_length/2+space*2),2*Y-(Y+Side_length/count),X-(Side_length/2+space),Y+Side_length/count);//D-A
+}

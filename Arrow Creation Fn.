@@ -1,0 +1,60 @@
+// Arrow creation fn.
+
+float round_value(float v)
+{
+  return floor(v + 0.5);
+}
+void LineDDL(double X0,double Y0, double X1, double Y1) // P0-P1 line.
+{
+  double dx=(X1-X0);
+  double dy=(Y1-Y0);
+  double steps;
+  float xInc,yInc,x=X0,y=Y0;
+  /* Find out whether to increment x or y */
+  steps=(fabs(dx)>fabs(dy))?(fabs(dx)):(fabs(dy));
+  xInc=dx/(float)steps;
+  yInc=dy/(float)steps;
+
+  glPointSize(0.75);
+  glBegin(GL_POINTS);
+  glVertex2d(x,y);
+  int k;
+  /* For every step, find an intermediate vertex */
+  for(k=0;k<steps;k++)
+  {
+    x+=xInc;
+    y+=yInc;
+    glVertex2d(round_value(x), round_value(y));
+  }
+  glEnd();
+  glFlush();
+}
+
+void DrawArrow(float x1, float y1, float x2, float y2) //Draws an arrow from x1,y1 to x2,y2.
+{ 
+glColor3f(1.0,1.0,1.0);
+
+float dx = x2 - x1;
+float dy = y2 - y1;
+//Vector length.
+float length = sqrt(dx*dx + dy*dy);
+//Vector components.
+float vdx = dx / length;
+float vdy = dy / length;
+//Perpendicular vector.
+float px = -vdy;
+float py = vdx;
+
+//Points forming the arrow head with length 4 and height 3 from the main line.
+
+float leftx = x2 - 4*vdx + 3*px;
+float lefty = y2 - 4*vdy + 3*py;
+float rightx = x2 - 4*vdx - 3*px;
+float righty = y2 - 4*vdy - 3*py;
+
+//Line tip.
+LineDDL(x2,y2,leftx,lefty);
+LineDDL(x2,y2,rightx,righty);
+//The main line.
+LineDDL(x1,y1,x2,y2);
+}

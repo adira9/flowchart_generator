@@ -413,7 +413,7 @@ void display()
 
             //drawRectangle(a,b);
             //CircleBubble(text);
-            EllipseBubble(text);
+            RectangleBubble(text);
 
    glEnd();
    glFlush();

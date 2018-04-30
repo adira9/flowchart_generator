@@ -11,6 +11,7 @@ char *text="Textin";
 //GLfloat x1,y1,x2,y2,x3,y3,x4,y4,x5,y5;
 double X,Y;
 int a,b;
+float rx,ry;
 int text_length;
 
 void setPixel(GLint x,GLint y)
@@ -84,9 +85,7 @@ void edgedetect(GLfloat x1,GLfloat y1,GLfloat x2,GLfloat y2,int *le1,int *re1,in
                 mx=(x2-x1)/(y2-y1);
             else
                 mx=x2-x1;
-
             x=x1;
-
             for(i=y1;i<y2;i++)
             {
                 if(le2[i]<2 && re2[i]<2){
@@ -150,6 +149,7 @@ void scanfill(float x1,float y1,float x2,float y2,float x3,float y3,float x4,flo
                 if(le1[y]<=re1[y])
                     for(i=le1[y]+1;i<re1[y];i++)
                         drawpixel(i,y);
+
                 if(le2[y]>2 && re2[y]>2)
                     for(i=le2[y]+1;i<re2[y];i++)
                         drawpixel(i,y);
@@ -248,26 +248,26 @@ void drawCircle(double r)
  glFlush();
  }
 
- void plotEllipse(float x, float y)
+void drawEllipse(float x, float y)
 {
     int p1[] = {(int)X+x, (int)Y+y};
     int p2[] = {(int)X-x, (int)Y+y};
     int p3[] = {(int)X+x, (int)Y-y};
     int p4[] = {(int)X-x, (int)Y-y};
-    glColor3f (1.0, 1.0, 1.0);
+    glColor3f (0.0, 0.0, 0.0);
     glVertex2iv(p1);
     glVertex2iv(p2);
     glVertex2iv(p3);
     glVertex2iv(p4);
 }
 
-void drawellipse(float rx, float ry)
+void ellipseMidpoint(float rx, float ry)
 {
     float rxSq = rx * rx;
     float rySq = ry * ry;
     float x = 0, y = ry, p;
     float px = 0, py = 2 * rxSq * y;
-    drawellipse(x, y);
+    drawEllipse(x, y);
 
     p = rySq - (rxSq * ry) + (0.25 * rxSq);
     while (px < py)
@@ -282,7 +282,7 @@ void drawellipse(float rx, float ry)
             py = py - 2 * rxSq;
             p = p + rySq + px - py;
         }
-        plotEllipse(x, y);
+        drawEllipse(x, y);
     }
 
     p = rySq*(x+0.5)*(x+0.5) + rxSq*(y-1)*(y-1) - rxSq*rySq;
@@ -298,30 +298,44 @@ void drawellipse(float rx, float ry)
             px = px + 2 * rySq;
             p = p + rxSq - py + px;
         }
-        plotEllipse(x, y);
+        drawEllipse(x, y);
     }
 }
+
+void Linedda(float x0,float y0,float xn,float yn){
+ float dx=xn-x0,dy=yn-y0,steps,k;
+ float xIncrement,yIncrement,x=x0,y=y0;
+ glColor3f (1.0, 0.0, 0.0);
+ if(abs(dx)>abs(dy))
+ steps=abs(dx);
+ else steps=abs(dy);
+ xIncrement=dx/(float)steps;
+ yIncrement=dy/(float)steps;
+ setPixel(ROUND(x),ROUND(y));
+for(k=0;k<steps;k++)
+ {
+ x+=xIncrement;
+ y+=yIncrement;
+ setPixel(ROUND(x),ROUND(y));
+ }
+ }
 
 void colorEllipse(float rx,float ry){
 float i;
 float yco,xco;
+float x=X,y=Y;
+printf("colorEllipse");
 for(i=-rx;i<=rx;i++){
     yco=(ry*(sqrt(pow(rx,2)-pow(i,2))))/rx;
-    Linedda(i,-yco,i,+yco);
-    Linedda(-i,-yco,-i,+yco);
+    Linedda(i+x,-yco+y,i+x,yco+y);
+    Linedda(-i+x,-yco+y,-i+x,yco+y);
+}
+for(i=-ry;i<=ry;i++){
+    xco=(rx*(sqrt(pow(ry,2)-pow(i,2))))/ry;
+    Linedda(-xco+x,i+y,xco+x,i+y);
+    Linedda(-xco+x,-i+y,xco+x,-i+y);
 }
 }
-
- void drawEllipse(double rx,double ry)
- {
- glClear (GL_COLOR_BUFFER_BIT);
- glColor3f (1.0, 0.0, 0.0);
- glBegin(GL_POINTS);
- drawellipse(rx,ry);
-colorEllipse(rx,ry);
- glEnd();
- glFlush();
- }
 
 void RenderBitmap(float x,float y, void *font, char *string)
 {
@@ -401,22 +415,17 @@ void EllipseBubble()
     //printf("%d\n",glutBitmapLength(GLUT_BITMAP_TIMES_ROMAN_10,ptr));
     text_length=glutBitmapLength(GLUT_BITMAP_TIMES_ROMAN_10,ptr);
     //printf("%d\n",glutBitmapWidth(GLUT_BITMAP_TIMES_ROMAN_24,buf[0]));
-drawEllipse(text_length*10.0,text_length*1);
+glBegin(GL_POINTS);
+ellipseMidpoint(text_length*5.0,text_length*2);
+colorEllipse(text_length*5.0,text_length*2);
 glColor3f(0.0f,0.0f,0.0f);
-   //RenderBitmap(X-text_length,Y-50/4,GLUT_BITMAP_TIMES_ROMAN_24,buf);
+RenderBitmap(X-text_length,Y-50/4,GLUT_BITMAP_TIMES_ROMAN_24,buf);
 }
 
 void display()
 {
             glClear(GL_COLOR_BUFFER_BIT);
-            //a=50;
-            //b=20;
-            //x1=200,y1=200,x2=100,y2=300,x3=200,y3=400,x4=300,y4=300;
-           // x1=100,y1=100,x2=400,y2=100,x3=400,y3=400,x4=250,y4=300;
-
-            //drawRectangle(a,b);
-            //CircleBubble(text);
-            CircleBubble(text);
+            EllipseBubble();
 
    glEnd();
    glFlush();
@@ -437,7 +446,11 @@ int main(int argc,char **argv)
             glutInitWindowPosition(0,0);
             X=300;
             Y=300;
-            glutCreateWindow("Circle");
+            rx=80;
+            ry=45;
+            a=10;
+            b=10;
+            glutCreateWindow("Ellipse");
             glutDisplayFunc(display);
             myinit();
             glutMainLoop();
